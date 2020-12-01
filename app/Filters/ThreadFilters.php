@@ -11,7 +11,8 @@ class ThreadFilters extends Filters
     // Whenever we need to add a filter, we can just update this array.
     protected $filters = [
         'by',
-        'popular'
+        'popular',
+        'unanswered'
     ];
 
     /**
@@ -38,6 +39,11 @@ class ThreadFilters extends Filters
         $this->builder->getQuery()->orders = []; // clear the default orderBy (created_at)
 
         $this->builder->orderBy('replies_count', 'desc');
+    }
+
+    protected function unanswered()
+    {
+        $this->builder->doesntHave('replies');
     }
 }
 

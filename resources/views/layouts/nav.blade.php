@@ -20,6 +20,7 @@
                     </a>
                     <div class="dropdown-menu" aria-labelledby="navbarDropdown">
                         <a class="dropdown-item" href="/threads?popular=1">Popular</a>
+                        <a class="dropdown-item" href="/threads?unanswered=1">Unanswered</a>
                         <a class="dropdown-item" href="{{route('threads')}}">All Threads</a>
                         @auth
                             <a class="dropdown-item" href="/threads/?by={{ auth()->user()->name }}">My Threads</a>
