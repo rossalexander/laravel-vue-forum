@@ -36,7 +36,7 @@ class ThreadTest extends TestCase
         $this->assertInstanceOf(User::class, $this->thread->owner);
     }
 
-    public function test_a_thread_can_add_a_reply()
+    function test_a_thread_can_add_a_reply()
     {
         $this->thread->addReply([
             'body' => 'Foobar',
@@ -46,8 +46,45 @@ class ThreadTest extends TestCase
         $this->assertCount(1, $this->thread->replies);
     }
 
-    public function test_a_thread_belongs_to_a_channel()
+    function test_a_thread_belongs_to_a_channel()
     {
         $this->assertInstanceOf(Channel::class, $this->thread->channel);
     }
+
+    function test_a_thread_can_be_subscribed_to()
+    {
+        $this->withoutExceptionHandling();
+
+        // Given we have a thread
+        $thread = $this->thread;
+
+        // And an auth user
+        $user = User::factory()->create();
+        $this->actingAs($user);
+
+        // When the user subscribes to the thread
+        $thread->subscribe();
+
+        // Then we should be able to fetch all threads that the user has subscribed to.
+        $this->assertEquals(1, $thread->subscriptions()->where('user_id', $user->id)->count());
+    }
+
+    function test_a_thread_can_be_unsubscribed_from()
+    {
+        // Given we have a thread
+        $thread = $this->thread;
+
+        // And an auth user who is subscribed to the thread
+        $user = User::factory()->create();
+        $this->actingAs($user);
+        $thread->subscribe($user->id);
+
+        // When the thread is unsubscribed from
+        $thread->unsubscribe($user->id);
+
+        // The thread should have no subscriptions
+        $this->assertCount(0, $thread->subscriptions);
+    }
+
+
 }
