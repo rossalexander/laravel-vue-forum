@@ -11,6 +11,7 @@ class Thread extends Model
 
     protected $guarded = [];
     protected $with = ['owner', 'channel'];
+    protected $appends = ['isSubscribed']; // append isSubscribed property to array output whenever this model is called
 
     protected static function boot()
     {
@@ -68,6 +69,13 @@ class Thread extends Model
         $this->subscriptions()
             ->where('user_id', $user_id ?: auth()->id())
             ->delete();
+    }
+
+    public function getIsSubscribedAttribute() // custom Eloquent accessor
+    {
+        return $this->subscriptions()
+            ->where('user_id', auth()->id())
+            ->exists(); // We don't need to fetch any data. We just need to know if there is a matching record.
     }
 
     public function subscriptions()

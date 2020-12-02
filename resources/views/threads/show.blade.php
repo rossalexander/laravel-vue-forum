@@ -28,8 +28,8 @@
                         </div>
                     </div>
 
-{{--                    Replies component is responsible for requesting all of the data that it needs,--}}
-{{--                    rather than having our server side pass to it.--}}
+                    {{--                    Replies component is responsible for requesting all of the data that it needs,--}}
+                    {{--                    rather than having our server side pass to it.--}}
                     <replies @added="repliesCount++" @removed="repliesCount--"></replies>
 
                 </div>
@@ -41,6 +41,9 @@
                                 This thread was published {{$thread->created_at->diffForHumans()}} by
                                 <a href="#">{{$thread->owner->name}}</a> and has <span v-text="repliesCount"></span>
                                 {{Str::plural('comment', $thread->repliesCount)}}.
+                            </p>
+                            <p>
+                                <subscribe-button :active="{{json_encode($thread->isSubscribed)}}"></subscribe-button>
                             </p>
                         </div>
                     </div>

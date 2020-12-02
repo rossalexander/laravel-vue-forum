@@ -5,6 +5,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ThreadController;
+use App\Http\Controllers\ThreadSubscriptionController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -27,6 +28,8 @@ Route::get('/threads/{channel:slug}/{thread}', [ThreadController::class, 'show']
 Route::get('/threads/{channel}/{thread}/replies', [ReplyController::class, 'index']);
 Route::post('/threads', [ThreadController::class, 'store']);
 Route::post('/threads/{channel:slug}/{thread}/replies', [ReplyController::class, 'store']);
+Route::post('/threads/{channel}/{thread}/subscriptions', [ThreadSubscriptionController::class, 'store'])->middleware('auth');
+Route::delete('/threads/{channel}/{thread}/subscriptions', [ThreadSubscriptionController::class, 'destroy'])->middleware('auth');
 Route::delete('/threads/{channel:slug}/{thread}', [ThreadController::class, 'destroy']);
 
 // Reply

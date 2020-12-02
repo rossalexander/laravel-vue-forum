@@ -92,6 +92,8 @@ class ThreadController extends Controller
     public function show($channelId, Thread $thread)
     {
 //        return $thread->replies;
+//        dd($thread->isSubscribed);
+//        return $thread;
         return view('threads.show', compact('thread'));
     }
 
