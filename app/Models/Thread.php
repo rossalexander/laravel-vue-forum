@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Notifications\ThreadWasUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -47,9 +48,32 @@ class Thread extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
+    /**
+     * Add a reply to the thread
+     *
+     * @param $reply
+     * @return Model
+     */
     public function addReply($reply)
     {
-        return $this->replies()->create($reply);
+        // Save the reply.
+        $reply = $this->replies()->create($reply);
+
+        $this->subscriptions
+            ->filter(function ($sub) use ($reply) {
+                return $sub->user_id != $reply->user_id;
+            })->each->notify($reply);
+//            ->each(function ($sub) use ($reply) {
+//                $sub->user->notify(new ThreadWasUpdated($this, $reply));
+//            });
+
+//        foreach ($this->subscriptions as $subscription) {
+//            if ($subscription->user_id != $reply->user_id) {
+//                $subscription->user->notify(new ThreadWasUpdated($this, $reply));
+//            }
+//        }
+
+        return $reply;
     }
 
     public function scopeFilter($query, $filters)
@@ -57,11 +81,19 @@ class Thread extends Model
         return $filters->apply($query);
     }
 
+    /**
+     * Subscribe a user to the current thread.
+     *
+     * @param int|null $user_id
+     * @return $this
+     */
     public function subscribe($user_id = null)
     {
         $this->subscriptions()->create([
             'user_id' => $user_id ?: auth()->id()
         ]);
+
+        return $this;
     }
 
     public function unsubscribe($user_id = null)

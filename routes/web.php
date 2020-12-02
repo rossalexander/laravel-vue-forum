@@ -6,6 +6,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReplyController;
 use App\Http\Controllers\ThreadController;
 use App\Http\Controllers\ThreadSubscriptionController;
+use App\Http\Controllers\UserNotificationController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -16,9 +17,6 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', [HomeController::class, 'index'])->name('home');
-
-// Profile
-Route::get('/profiles/{user:name}', [ProfileController::class, 'show'])->name('profile');
 
 // Thread
 Route::get('/threads', [ThreadController::class, 'index'])->name('threads');
@@ -38,3 +36,7 @@ Route::patch('/replies/{reply}', [ReplyController::class, 'update']);
 Route::delete('/replies/{reply}', [ReplyController::class, 'destroy']);
 Route::delete('/replies/{reply}/favorites', [FavoriteController::class, 'destroy']);
 
+// Profile
+Route::get('/profiles/{user:name}', [ProfileController::class, 'show'])->name('profile');
+Route::get('/profiles/{user:name}/notifications', [UserNotificationController::class, 'index']);
+Route::delete('/profiles/{user:name}/notifications/{notification}', [UserNotificationController::class, 'destroy']);

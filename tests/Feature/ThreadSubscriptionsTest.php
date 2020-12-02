@@ -14,7 +14,7 @@ class ThreadSubscriptionsTest extends TestCase
 
     function test_a_user_can_subscribe_to_a_thread()
     {
-        $this->withoutExceptionHandling();
+        // $this->withoutExceptionHandling();
 
         // Give that we have a thread
         $thread = Thread::factory()->create();
@@ -24,10 +24,7 @@ class ThreadSubscriptionsTest extends TestCase
         $this->actingAs($user);
         $this->post($thread->path() . '/subscriptions');
 
-        // Then, each time a new reply is left
-        $reply = Reply::factory()->create(['thread_id' => $thread->id]);
-
-        // a notification should be prepare for the user
+        $this->assertCount(1, $thread->fresh()->subscriptions);
     }
 
     function test_a_user_can_unsubscribe_from_a_thread()
