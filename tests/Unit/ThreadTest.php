@@ -6,7 +6,9 @@ namespace Tests\Unit;
 use App\Models\Channel;
 use App\Models\Thread;
 use App\Models\User;
+use App\Notifications\ThreadWasUpdated;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class ThreadTest extends TestCase
@@ -44,6 +46,24 @@ class ThreadTest extends TestCase
         ]);
 
         $this->assertCount(1, $this->thread->replies);
+    }
+
+    function test_a_thread_notifies_all_subscribers_when_a_reply_is_added()
+    {
+        // Fake the notification
+        Notification::fake();
+
+        $this->actingAs(User::factory()->create());
+
+        $this->thread
+            ->subscribe()
+            ->addReply([
+                'body' => 'foobar',
+                'user_id' => 999
+            ]);
+
+        Notification::assertSentTo(auth()->user(), ThreadWasUpdated::class);
+
     }
 
     function test_a_thread_belongs_to_a_channel()
