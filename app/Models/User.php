@@ -4,9 +4,16 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
+/**
+ * Class User
+ * @package App\Models
+ * @property $name
+ * @property $notifications
+ */
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
@@ -42,12 +49,18 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    public function threads()
+    /**
+     * @return HasMany
+     */
+    public function threads(): HasMany
     {
         return $this->hasMany(Thread::class)->latest();
     }
 
-    public function activity()
+    /**
+     * @return HasMany
+     */
+    public function activity(): HasMany
     {
         return $this->hasMany(Activity::class);
     }

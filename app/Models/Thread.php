@@ -2,10 +2,19 @@
 
 namespace App\Models;
 
-use App\Notifications\ThreadWasUpdated;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * Class Thread
+ * @package App\Models
+ * @property $channel
+ * @property $id
+ * @property $subscriptions
+ * @property $user_id
+ */
 class Thread extends Model
 {
     use HasFactory, RecordsActivity;
@@ -28,52 +37,43 @@ class Thread extends Model
         });
     }
 
-    public function channel()
+    public function channel(): BelongsTo
     {
         return $this->belongsTo(Channel::class);
     }
 
-    public function path()
+    public function path(): string
     {
         return "/threads/{$this->channel->slug}/{$this->id}";
     }
 
-    public function replies()
+    public function replies(): HasMany
     {
         return $this->hasMany(Reply::class);
     }
 
-    public function owner()
+    public function owner(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * Add a reply to the thread
-     *
-     * @param $reply
-     * @return Model
-     */
-    public function addReply($reply)
+
+    public function addReply($reply): Model
     {
         // Save the reply.
         $reply = $this->replies()->create($reply);
 
-        $this->subscriptions
-            ->filter(function ($sub) use ($reply) {
-                return $sub->user_id != $reply->user_id;
-            })->each->notify($reply);
-//            ->each(function ($sub) use ($reply) {
-//                $sub->user->notify(new ThreadWasUpdated($this, $reply));
-//            });
-
-//        foreach ($this->subscriptions as $subscription) {
-//            if ($subscription->user_id != $reply->user_id) {
-//                $subscription->user->notify(new ThreadWasUpdated($this, $reply));
-//            }
-//        }
+        $this->notifySubscribers($reply);
 
         return $reply;
+    }
+
+    public function notifySubscribers($reply)
+    {
+        $this->subscriptions
+            ->where('user_id', '!=', $reply->user_id)
+            ->each
+            ->notify($reply);
     }
 
     public function scopeFilter($query, $filters)
@@ -87,7 +87,7 @@ class Thread extends Model
      * @param int|null $user_id
      * @return $this
      */
-    public function subscribe($user_id = null)
+    public function subscribe($user_id = null): Thread
     {
         $this->subscriptions()->create([
             'user_id' => $user_id ?: auth()->id()
@@ -103,16 +103,17 @@ class Thread extends Model
             ->delete();
     }
 
-    public function getIsSubscribedAttribute() // custom Eloquent accessor
+    public function getIsSubscribedAttribute(): bool
     {
         return $this->subscriptions()
             ->where('user_id', auth()->id())
             ->exists(); // We don't need to fetch any data. We just need to know if there is a matching record.
     }
 
-    public function subscriptions()
+    public function subscriptions(): HasMany
     {
         return $this->hasMany(ThreadSubscription::class);
     }
+
 
 }
