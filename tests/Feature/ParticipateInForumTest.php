@@ -110,4 +110,17 @@ class ParticipateInForumTest extends TestCase
         $this->assertDatabaseHas('replies', ['id' => $reply->id, 'body' => $updatedReply]);
     }
 
+    function test_replies_that_contain_spam_may_not_be_created()
+    {
+        $this->withoutExceptionHandling();
+        $this->actingAs(User::factory()->create());
+
+        $thread = Thread::factory()->create();
+        $reply = Reply::factory()->create(['body' => 'PHP is dead.',]);
+
+        $this->expectException(\Exception::class);
+
+        $this->post($thread->path() . '/replies', $reply->toArray());
+    }
+
 }

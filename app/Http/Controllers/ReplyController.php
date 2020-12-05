@@ -3,10 +3,22 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reply;
+use App\Models\Spam;
 use App\Models\Thread;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
+use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Response;
 use Illuminate\Validation\ValidationException;
 
+/**
+ * Class ReplyController
+ * @package App\Http\Controllers
+ */
 class ReplyController extends Controller
 {
     /**
@@ -17,7 +29,12 @@ class ReplyController extends Controller
         $this->middleware('auth', ['except' => 'index']);
     }
 
-    public function index($channelID, Thread $thread)
+    /**
+     * @param $channelID
+     * @param Thread $thread
+     * @return LengthAwarePaginator
+     */
+    public function index($channelID, Thread $thread): LengthAwarePaginator
     {
         return $thread->replies()->paginate(20);
     }
@@ -27,14 +44,14 @@ class ReplyController extends Controller
      *
      * @param $channelID
      * @param Thread $thread
-     * @return RedirectResponse|void
+     * @param Spam $spam
+     * @return Model|RedirectResponse
      * @throws ValidationException
      */
-    public function store($channelID, Thread $thread)
+    public function store($channelID, Thread $thread, Spam $spam): Model|RedirectResponse
     {
-        $this->validate(request(), [
-            'body' => 'required',
-        ]);
+        $this->validate(request(), ['body' => 'required']);
+        $spam->detect(request('body'));
 
         $reply = $thread->addReply([
             'body' => request('body'),
@@ -48,13 +65,23 @@ class ReplyController extends Controller
         return back()->with('flash', 'Your reply has been left.');
     }
 
+    /**
+     * @param Reply $reply
+     * @throws AuthorizationException
+     */
     public function update(Reply $reply)
     {
         $this->authorize('update', $reply);
         $reply->update(['body' => request('body')]);
     }
 
-    public function destroy(Reply $reply)
+    /**
+     * @param Reply $reply
+     * @return Response|RedirectResponse
+     * @throws AuthorizationException
+     * @throws Exception
+     */
+    public function destroy(Reply $reply): Response|RedirectResponse
     {
         $this->authorize('update', $reply);
         $reply->delete();
@@ -63,7 +90,6 @@ class ReplyController extends Controller
             return response(['status' => 'Reply deleted']);
         }
 
-        // Else
         return back();
     }
 
