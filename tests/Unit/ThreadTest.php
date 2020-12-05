@@ -4,9 +4,11 @@ namespace Tests\Unit;
 
 
 use App\Models\Channel;
+use App\Models\Reply;
 use App\Models\Thread;
 use App\Models\User;
 use App\Notifications\ThreadWasUpdated;
+use Carbon\Carbon;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
@@ -121,6 +123,28 @@ class ThreadTest extends TestCase
         // But after the user subscribes, the user should be subscribed
         $thread->subscribe();
         $this->assertTrue($thread->isSubscribed);
+    }
+
+    function test_a_thread_can_check_if_the_auth_user_has_read_all_replies()
+    {
+        // Given that we have an auth user
+        $this->actingAs(User::factory()->create());
+
+        // and a thread,
+        $thread = Thread::factory()->create();
+
+        tap(auth()->user(), function ($user) use ($thread) {
+
+            // assert that the thread has updates for the user.
+            $this->assertTrue($thread->hasUpdatesFor($user));
+
+            // Simulate that the user visited the thread.
+            $user->read($thread);
+
+            // The thread has not been updated since the user visited.
+            // Therefore, assert that the the thread does not have updates for the user.
+            $this->assertFalse($thread->hasUpdatesFor($user));
+        });
     }
 
 

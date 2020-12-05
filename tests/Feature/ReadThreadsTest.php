@@ -43,6 +43,7 @@ class ReadThreadsTest extends TestCase
 
     public function test_user_can_filter_threads_by_channel()
     {
+        //$this->actingAs(User::factory()->create());
         $channel = Channel::factory()->create();
 
         $threadInChannel = create(Thread::class, ['channel_id' => $channel->id]);

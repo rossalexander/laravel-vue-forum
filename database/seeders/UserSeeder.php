@@ -24,15 +24,17 @@ class UserSeeder extends Seeder
             'password' => Hash::make('password'),
         ]);
 
+        // todo: sign in Jane
+
         User::factory()
-            ->times(10)
+            ->times(1)
             ->create()
             ->each(function ($user) {
                 $threads = Thread::factory()
-                    ->times(rand(1, 9))
+                    ->times(1)
                     ->create(['user_id' => $user->id])
                     ->each(function ($thread) {
-                        Reply::factory()->times(rand(0, 9))->create(['thread_id' => $thread->id]);
+                        Reply::factory()->times(1)->create(['thread_id' => $thread->id]);
                     });
                 $user->threads()->saveMany($threads);
             });

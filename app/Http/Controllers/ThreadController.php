@@ -4,20 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Channel;
 use App\Models\Thread;
-use App\Models\User;
 use App\Filters\ThreadFilters;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Redirector;
 use Illuminate\Validation\ValidationException;
-use function PHPUnit\Framework\isJson;
 
 class ThreadController extends Controller
 {
@@ -91,33 +89,11 @@ class ThreadController extends Controller
      */
     public function show($channelId, Thread $thread)
     {
-//        return $thread->replies;
-//        dd($thread->isSubscribed);
-//        return $thread;
+        if (auth()->check()) {
+            auth()->user()->read($thread);
+        }
+
         return view('threads.show', compact('thread'));
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param Thread $thread
-     * @return Response
-     */
-    public function edit(Thread $thread)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param Request $request
-     * @param Thread $thread
-     * @return Response
-     */
-    public function update(Request $request, Thread $thread)
-    {
-        //
     }
 
     /**

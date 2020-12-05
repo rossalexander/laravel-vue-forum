@@ -9,7 +9,15 @@
                         <div class="card-header">
                             <div class="level">
                                 <h4 class="flex">
-                                    <a href="{{$thread->path()}}">{{$thread->title}}</a>
+                                    <a href="{{$thread->path()}}">
+
+                                        @if(auth()->check() && $thread->hasUpdatesFor(auth()->user()))
+                                            <strong>{{$thread->title}}</strong>
+                                        @else
+                                            {{$thread->title}}
+                                        @endif
+
+                                    </a>
                                 </h4>
                                 <a href="{{$thread->path()}}"><strong>{{$thread->replies_count}} {{Str::plural('reply', $thread->replies_count)}}</strong></a>
                             </div>
@@ -24,7 +32,7 @@
                             </article>
                         </div>
                     </div>
-                    @empty
+                @empty
                     <p>It looks like there are no threads for this channel.</p>
                 @endforelse
             </div>

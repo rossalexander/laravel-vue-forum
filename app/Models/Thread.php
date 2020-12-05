@@ -19,8 +19,25 @@ class Thread extends Model
 {
     use HasFactory, RecordsActivity;
 
+    /**
+     * Don't auto-apply mass assignment protection.
+     *
+     * @var array
+     */
     protected $guarded = [];
+
+    /**
+     * Relationships to always eager load.
+     *
+     * @var string[]
+     */
     protected $with = ['owner', 'channel'];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var string[]
+     */
     protected $appends = ['isSubscribed']; // append isSubscribed property to array output whenever this model is called
 
     protected static function boot()
@@ -58,10 +75,16 @@ class Thread extends Model
     }
 
 
+    /**
+     * Add a reply to the thread
+     *
+     * @param $reply
+     * @return Model
+     */
     public function addReply($reply): Model
     {
-        // Save the reply.
         $reply = $this->replies()->create($reply);
+        $this->touch(); // todo: Find out why $this isn't updating without touching it.
 
         $this->notifySubscribers($reply);
 
@@ -113,6 +136,12 @@ class Thread extends Model
     public function subscriptions(): HasMany
     {
         return $this->hasMany(ThreadSubscription::class);
+    }
+
+    public function hasUpdatesFor(User $user): bool
+    {
+        $key = $user->visitedThreadCacheKey($this);
+        return $this->updated_at > cache($key);
     }
 
 
