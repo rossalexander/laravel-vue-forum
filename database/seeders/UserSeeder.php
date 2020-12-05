@@ -27,14 +27,14 @@ class UserSeeder extends Seeder
         // todo: sign in Jane
 
         User::factory()
-            ->times(1)
+            ->times(10)
             ->create()
             ->each(function ($user) {
                 $threads = Thread::factory()
-                    ->times(1)
+                    ->times(rand(1, 3))
                     ->create(['user_id' => $user->id])
                     ->each(function ($thread) {
-                        Reply::factory()->times(1)->create(['thread_id' => $thread->id]);
+                        Reply::factory()->times(rand(0,4))->create(['thread_id' => $thread->id]);
                     });
                 $user->threads()->saveMany($threads);
             });
