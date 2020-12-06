@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Reply;
-use App\Models\Spam;
+use App\Inspections\Spam;
 use App\Models\Thread;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -47,8 +47,9 @@ class ReplyController extends Controller
      * @param Spam $spam
      * @return Model|RedirectResponse
      * @throws ValidationException
+     * @throws Exception
      */
-    public function store($channelID, Thread $thread, Spam $spam): Model|RedirectResponse
+    public function store(string $channelID, Thread $thread, Spam $spam): Model|RedirectResponse
     {
         $this->validate(request(), ['body' => 'required']);
         $spam->detect(request('body'));
