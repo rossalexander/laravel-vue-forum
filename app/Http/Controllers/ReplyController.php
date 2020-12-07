@@ -46,10 +46,9 @@ class ReplyController extends Controller
      * @param Thread $thread
      * @param Spam $spam
      * @return Model|RedirectResponse
-     * @throws ValidationException
-     * @throws Exception
+     * @throws Exception|ValidationException
      */
-    public function store(string $channelID, Thread $thread, Spam $spam): Model|RedirectResponse
+    public function store(string $channelID, Thread $thread, Spam $spam)
     {
         $this->validate(request(), ['body' => 'required']);
         $spam->detect(request('body'));
@@ -79,10 +78,9 @@ class ReplyController extends Controller
     /**
      * @param Reply $reply
      * @return Response|RedirectResponse
-     * @throws AuthorizationException
-     * @throws Exception
+     * @throws Exception|AuthorizationException
      */
-    public function destroy(Reply $reply): Response|RedirectResponse
+    public function destroy(Reply $reply)
     {
         $this->authorize('update', $reply);
         $reply->delete();
