@@ -44,14 +44,12 @@ class ReplyController extends Controller
      *
      * @param $channelID
      * @param Thread $thread
-     * @param Spam $spam
      * @return Model|RedirectResponse
-     * @throws Exception|ValidationException
+     * @throws ValidationException
      */
-    public function store(string $channelID, Thread $thread, Spam $spam)
+    public function store(string $channelID, Thread $thread)
     {
-        $this->validate(request(), ['body' => 'required']);
-        $spam->detect(request('body'));
+        $this->validateReply();
 
         $reply = $thread->addReply([
             'body' => request('body'),
@@ -67,18 +65,23 @@ class ReplyController extends Controller
 
     /**
      * @param Reply $reply
-     * @throws AuthorizationException
+     * @throws AuthorizationException|ValidationException
+     * @throws Exception
      */
     public function update(Reply $reply)
     {
         $this->authorize('update', $reply);
+
+        $this->validateReply();
+
         $reply->update(['body' => request('body')]);
     }
 
     /**
      * @param Reply $reply
-     * @return Response|RedirectResponse
-     * @throws Exception|AuthorizationException
+     * @return Application|ResponseFactory|RedirectResponse|Response
+     * @throws AuthorizationException
+     * @throws Exception
      */
     public function destroy(Reply $reply)
     {
@@ -90,6 +93,20 @@ class ReplyController extends Controller
         }
 
         return back();
+    }
+
+
+    /**
+     * Validate reply body and check for spam
+     *
+     * @throws ValidationException
+     * @throws Exception
+     */
+    protected function validateReply(): void
+    {
+        $this->validate(request(), ['body' => 'required']);
+
+        resolve(Spam::class)->detect(request('body'));
     }
 
 }
