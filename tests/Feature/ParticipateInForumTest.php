@@ -7,6 +7,7 @@ use App\Models\Thread;
 use App\Models\User;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
 class ParticipateInForumTest extends TestCase
@@ -41,16 +42,16 @@ class ParticipateInForumTest extends TestCase
         $this->assertDatabaseHas('replies', ['body' => $reply->body]);
     }
 
-    function test_a_reply_requires_a_body()
-    {
-        $this->actingAs($user = User::factory()->create());
-
-        $thread = Thread::factory()->create();
-        $reply = Reply::factory()->make(['body' => null]);
-
-        //$this->expectException(ValidationException::class);
-        $this->post($thread->path() . '/replies', $reply->toArray())->assertSessionHasErrors('body');
-    }
+//    function test_a_reply_requires_a_body()
+//    {
+//        $this->actingAs($user = User::factory()->create());
+//
+//        $thread = Thread::factory()->create();
+//        $reply = Reply::factory()->make(['body' => null]);
+//
+////        $this->expectException(ValidationException::class);
+//        $this->post($thread->path() . '/replies', $reply->toArray())->assertSessionHasErrors('body');
+//    }
 
     function test_unauthorized_users_cannot_delete_replies()
     {
@@ -112,7 +113,7 @@ class ParticipateInForumTest extends TestCase
 
     function test_replies_that_contain_spam_may_not_be_created()
     {
-        $this->withoutExceptionHandling();
+//        $this->withoutExceptionHandling();
         $this->actingAs(User::factory()->create());
 
         $thread = Thread::factory()->create();

@@ -44,23 +44,27 @@ class ReplyController extends Controller
      *
      * @param $channelID
      * @param Thread $thread
-     * @return Model|RedirectResponse
-     * @throws ValidationException
+     * @return Model|Response
      */
     public function store(string $channelID, Thread $thread)
     {
-        $this->validateReply();
+        try {
+            $this->validateReply();
 
-        $reply = $thread->addReply([
-            'body' => request('body'),
-            'user_id' => auth()->id()
-        ]);
-
-        if (request()->expectsJson()) {
-            return $reply->load('owner'); // eager load owner for axios reply post
+            $reply = $thread->addReply([
+                'body' => request('body'),
+                'user_id' => auth()->id()
+            ]);
+        } catch (Exception $e) {
+            return response(
+                'Sorry, your reply could not be saved at this time.',
+                422
+            );
         }
 
-        return back()->with('flash', 'Your reply has been left.');
+
+        return $reply->load('owner'); // eager load owner for axios reply post
+
     }
 
     /**
@@ -71,10 +75,18 @@ class ReplyController extends Controller
     public function update(Reply $reply)
     {
         $this->authorize('update', $reply);
+        try {
+            $this->validateReply();
 
-        $this->validateReply();
+            $reply->update(['body' => request('body')]);
+        } catch (Exception $e) {
+            return response(
+                'Sorry, your reply could not be saved at this time.',
+                422
+            );
+        }
 
-        $reply->update(['body' => request('body')]);
+
     }
 
     /**

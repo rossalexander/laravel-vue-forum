@@ -49,6 +49,9 @@ export default {
                     // We need NewReply to communicate with our Replies.vue collection
                     // 6. We emit an event 'created' and send through the data response from the server
                     this.$emit('created', response.data); // could also use ES2015 shorthand {data}
+                })
+                .catch(error => {
+                    flash(error.response.data, 'danger');
                 });
         }
     }
